@@ -1,0 +1,1 @@
+SELECT * FROM "saved_recipes" LIMIT 1000;

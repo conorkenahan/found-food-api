@@ -1,1 +1,1 @@
-DROP TABLE IF EXISTS saved_Recipes;
+DROP TABLE IF EXISTS saved_recipes;
