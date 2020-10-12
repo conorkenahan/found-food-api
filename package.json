@@ -32,9 +32,7 @@
     "node-fetch": "^2.6.1",
     "pg": "^8.4.0",
     "postgrator": "^4.1.0",
-    "xss": "^1.0.8"
-  },
-  "devDependencies": {
+    "xss": "^1.0.8",
     "chai": "^4.2.0",
     "mocha": "^8.1.3",
     "nodemon": "^2.0.4",
