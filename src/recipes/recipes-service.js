@@ -2,24 +2,28 @@ const RecipesService = {
   getAllRecipes(knex) {
     return knex.select("*").from("saved_recipes");
   },
-  getAllRecipesByUser(knex, userId) {
-    return knex.select("*").from("saved_recipes").where({ userId });
+  getAllRecipesByUser(knex, userid) {
+    return knex.select("*").from("saved_recipes").where({ userid });
+  },
+  getUserId(knex, username) {
+    return knex.from("users").select("users.id").where({ username }).first();
   },
   insertRecipe(knex, newRecipe) {
     return knex
       .insert(newRecipe)
       .into("saved_recipes")
+      .where(newRecipe.recipeid !== "saved_recipes.recipeid")
       .returning("*")
       .then((rows) => {
         return rows[0];
       });
   },
-  //   getById(knex, id) {
-  //     return knex.from("saved_recipes").select("*").where({id}).first();
-  //   },
-  //     ^  necessary?
-  deleteRecipe(knex, id) {
-    return knex("saved_recipes").where({ id }).delete();
+
+  deleteRecipe(knex, recipeToDelete) {
+    return knex("saved_recipes")
+      .where("saved_recipes.recipeid", recipeToDelete.recipeid)
+      .andWhere("saved_recipes.userid", recipeToDelete.userid)
+      .delete();
   },
 
   serializeRecipe(recipe) {
