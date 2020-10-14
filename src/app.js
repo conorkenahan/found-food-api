@@ -15,6 +15,10 @@ app.use(cors());
 app.use(helmet());
 const recipesRouter = require("./recipes/recipes-router");
 
+app.get("/", (req, res) => {
+  res.send("Hello, world!");
+});
+
 app.use("/api/recipes", recipesRouter);
 app.use("/api/auth", authRouter);
 app.use("/api/users", usersRouter);
