@@ -26,7 +26,7 @@ recipesRouter.route("/").post(jsonBodyParser, (req, res, next) => {
     newRecipe = { ...newRecipe, userid };
     RecipesService.insertRecipe(req.app.get("db"), newRecipe).then((recipe) => {
       res.json(recipe);
-      res.status(201);
+      res.status(200);
     });
   });
   for (const [key, value] of Object.entries(newRecipe))
@@ -43,8 +43,7 @@ recipesRouter.route("/").delete(jsonBodyParser, (req, res, next) => {
     userid = id.id;
     recipeToDelete = { ...recipeToDelete, userid };
     RecipesService.deleteRecipe(req.app.get("db"), recipeToDelete).then(() => {
-      res.json(false);
-      res.status(204);
+      res.status(204).send();
     });
   });
   for (const [key, value] of Object.entries(recipeToDelete))
@@ -53,13 +52,5 @@ recipesRouter.route("/").delete(jsonBodyParser, (req, res, next) => {
         error: `Missing '${key}' in request body`,
       });
 });
-
-// recipesRouter.route("/user/:userid").get(jsonBodyParser, (req, res, next) => {
-//   RecipesService.getAllRecipesByUser(req.app.get("db"), req.params.userid)
-//     .then((recipes) => {
-//       res.json(recipes);
-//     })
-//     .catch(next);
-// });
 
 module.exports = recipesRouter;

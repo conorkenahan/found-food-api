@@ -1,95 +1,117 @@
 const knex = require("knex");
 const app = require("../src/app");
-const helpers = require("./test-helpers");
+const { makeRecipesArray } = require("./saved_recipes.fixtures");
+const { makeUsersArray } = require("./users.fixtures");
 
 describe("Recipes Endpoints", function () {
   let db;
 
-  const { testRecipes, testUsers } = helpers.makeArticlesFixtures();
-
   before("make knex instance", () => {
     db = knex({
       client: "pg",
-      connection: process.env.TEST_DB_URL,
+      connection: process.env.TEST_DATABASE_URL,
     });
     app.set("db", db);
   });
 
   after("disconnect from db", () => db.destroy());
 
-  before("cleanup", () => helpers.cleanTables(db));
+  before("clean the table", () =>
+    db.raw("TRUNCATE saved_recipes, users RESTART IDENTITY CASCADE")
+  );
 
-  afterEach("cleanup", () => helpers.cleanTables(db));
+  afterEach("cleanup", () =>
+    db.raw("TRUNCATE saved_recipes, users RESTART IDENTITY CASCADE")
+  );
 
-  describe(`POST /api/comments`, () => {
-    beforeEach("insert articles", () =>
-      helpers.seedArticlesTables(db, testUsers, testRecipes)
-    );
-
-    it(`creates an comment, responding with 201 and the new comment`, function () {
-      this.retries(3);
-      const testArticle = testRecipes[0];
-      const testUser = testUsers[0];
-      const newComment = {
-        text: "Test new comment",
-        article_id: testArticle.id,
-        user_id: testUser.id,
-      };
-      return supertest(app)
-        .post("/api/comments")
-        .send(newComment)
-        .expect(201)
-        .expect((res) => {
-          expect(res.body).to.have.property("id");
-          expect(res.body.text).to.eql(newComment.text);
-          expect(res.body.article_id).to.eql(newComment.article_id);
-          expect(res.body.user.id).to.eql(testUser.id);
-          expect(res.headers.location).to.eql(`/api/comments/${res.body.id}`);
-          const expectedDate = new Date().toLocaleString("en", {
-            timeZone: "UTC",
+  describe(`GET /api/recipes/:username`, () => {
+    context("Given there are recipes in the database", () => {
+      const testUsers = makeUsersArray();
+      const testRecipes = makeRecipesArray();
+      beforeEach("insert recipes", () => {
+        return db
+          .into("users")
+          .insert(testUsers)
+          .then(() => {
+            return db.into("saved_recipes").insert(testRecipes);
           });
-          const actualDate = new Date(res.body.date_created).toLocaleString();
-          expect(actualDate).to.eql(expectedDate);
-        })
-        .expect((res) =>
-          db
-            .from("blogful_comments")
-            .select("*")
-            .where({ id: res.body.id })
-            .first()
-            .then((row) => {
-              expect(row.text).to.eql(newComment.text);
-              expect(row.article_id).to.eql(newComment.article_id);
-              expect(row.user_id).to.eql(newComment.user_id);
-              const expectedDate = new Date().toLocaleString("en", {
-                timeZone: "UTC",
-              });
-              const actualDate = new Date(row.date_created).toLocaleString();
-              expect(actualDate).to.eql(expectedDate);
-            })
-        );
-    });
-
-    const requiredFields = ["text", "user_id", "article_id"];
-
-    requiredFields.forEach((field) => {
-      const testArticle = testRecipes[0];
-      const testUser = testUsers[0];
-      const newComment = {
-        text: "Test new comment",
-        user_id: testUser.id,
-        article_id: testArticle.id,
-      };
-
-      it(`responds with 400 and an error message when the '${field}' is missing`, () => {
-        delete newComment[field];
-
+      });
+      it(`responds with 200 and user's recipe list`, () => {
+        const username = "user1";
         return supertest(app)
-          .post("/api/comments")
-          .send(newComment)
-          .expect(400, {
-            error: `Missing '${field}' in request body`,
+          .get(`/api/recipes/${username}`)
+          .expect(200, [
+            {
+              id: 1,
+              recipeid: 12345,
+              title: "First test post!",
+              image: "https://spoonacular.com/recipeImages/13934-312x231.jpg",
+              url: "",
+              userid: 1,
+            },
+            {
+              id: 2,
+              recipeid: 23456,
+              title: "Second test post!",
+              image: "https://spoonacular.com/recipeImages/575558-312x231.jpg",
+              url: "",
+              userid: 1,
+            },
+          ]);
+      });
+    });
+  });
+
+  describe(`POST /api/recipes/`, () => {
+    context(`Given there are users in the database`, () => {
+      const testUsers = makeUsersArray();
+      beforeEach("insert recipes", () => {
+        return db.into("users").insert(testUsers);
+      });
+      it(`responds with 200 and added recipe`, () => {
+        const newRecipe = {
+          image: "https://spoonacular.com/recipeImages/13934-312x231.jpg",
+          recipeid: 420,
+          title: "Test recipe!",
+          url: "recipe.com",
+          username: "user1",
+        };
+        return supertest(app)
+          .post(`/api/recipes/`)
+          .send(newRecipe)
+          .expect(200, {
+            id: 1,
+            image: "https://spoonacular.com/recipeImages/13934-312x231.jpg",
+            recipeid: 420,
+            title: "Test recipe!",
+            url: "recipe.com",
+            userid: 1,
           });
+      });
+    });
+  });
+
+  describe(`DELETE /api/recipes/`, () => {
+    const recipeToDelete = {
+      recipeid: 12345,
+      username: "user1",
+    };
+    context("Given there are recipes in the database", () => {
+      const testUsers = makeUsersArray();
+      const testRecipes = makeRecipesArray();
+      beforeEach("insert recipes", () => {
+        return db
+          .into("users")
+          .insert(testUsers)
+          .then(() => {
+            return db.into("saved_recipes").insert(testRecipes);
+          });
+      });
+      it("responds with 204 and removes the recipe", () => {
+        return supertest(app)
+          .delete(`/api/recipes/`)
+          .send(recipeToDelete)
+          .expect(204);
       });
     });
   });
