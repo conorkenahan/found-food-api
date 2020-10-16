@@ -1,3 +1,5 @@
+const bcrypt = require("bcryptjs");
+
 function makeUsersArray() {
   return [
     {
@@ -116,20 +118,30 @@ function cleanTables(db) {
   );
 }
 
-function seedRecipesTable(db, users, recipes = []) {
-  // use a transaction to group the queries and auto rollback on any failure
+function seedRecipesTable(db, users, recipes) {
   return db.transaction(async (trx) => {
     await trx.into("users").insert(users);
     await trx.into("saved_recipes").insert(recipes);
-    // update the auto sequence to match the forced id values
     await Promise.all([
       trx.raw(`SELECT setval('users_id_seq', ?)`, [users[users.length - 1].id]),
       trx.raw(`SELECT setval('saved_recipes_id_seq', ?)`, [
         recipes[recipes.length - 1].id,
       ]),
     ]);
-    // only insert comments if there are some, also update the sequence counter
   });
+}
+
+function seedUsers(db, users) {
+  const preppedUsers = users.map((user) => ({
+    ...user,
+    password: bcrypt.hashSync(user.password, 1),
+  }));
+  return db
+    .into("users")
+    .insert(preppedUsers)
+    .then(() =>
+      db.raw(`SELECT setval('users_id_seq', ?)`, [users[users.length - 1].id])
+    );
 }
 
 module.exports = {
@@ -140,4 +152,5 @@ module.exports = {
   makeRecipesFixtures,
   cleanTables,
   seedRecipesTable,
+  seedUsers,
 };
