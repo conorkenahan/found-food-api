@@ -9,7 +9,8 @@ This is the backend code for Found Food, a recipe searching app that allows user
 
 ### Recipes Endpoints
 
-###`GET /api/recipes/:username`
+### ▸ `GET /api/recipes/:username`
+
 Returns an array of recipes of a specific user.
 
 #### Sample Query
@@ -46,7 +47,8 @@ Returns an array of recipes of a specific user.
 - `url - string` - web URL of recipe
 - `userid - integer` - userid of saved recipe
 
-`POST /api/recipes`
+### ▸ `POST /api/recipes`
+
 In order to post, or save, a recipe, the request body must have a recipeid, title, image, url and username.
 
 #### Example Request
@@ -61,7 +63,8 @@ In order to post, or save, a recipe, the request body must have a recipeid, titl
 }
 ```
 
-`DELETE /api/recipes/`
+### ▸ `DELETE /api/recipes/`
+
 This endpoint allows a user to remove a saved recipe from their list. In order to do so, the request must contain a recipeid and a userid.
 
 #### Example Request
@@ -75,7 +78,8 @@ This endpoint allows a user to remove a saved recipe from their list. In order t
 
 ### Users Endpoints
 
-`POST /api/users`
+### ▸ `POST /api/users`
+
 In order to create a new user, a POST request is made to the above endpoint. The request must contain a username and password.
 
 #### Example Request
@@ -89,7 +93,7 @@ In order to create a new user, a POST request is made to the above endpoint. The
 
 ### Auth Endpoints
 
-`POST /api/auth/login`
+### ▸ `POST /api/auth/login`
 
 #### Example Request
 
@@ -106,7 +110,7 @@ In order to create a new user, a POST request is made to the above endpoint. The
 }
 ```
 
-`POST /api/auth/refresh`
+### ▸ `POST /api/auth/refresh`
 
 #### Example Request
 
@@ -120,32 +124,13 @@ Authorization: Bearer ${token}
 }
 ```
 
-## Screenshots
+## Technology Stack
 
-- Select the ingredients you have on hand from a list...
+### Backend
 
-  <img src="./src/images/screenshots/main.png" width="256">
-
-- View a list of compatible recipes!
-
-  <img src="./src/images/screenshots/results.png" width="256">
-
-- Register and login to save your favorite recipes.
-
-  <img src="./src/images/screenshots/register.png" width="256">
-  <img src="./src/images/screenshots/login.png" width="256">
-
-- View your saved recipes when logged in.
-
-  <img src="./src/images/screenshots/saved_recipes.png" width="256">
-
-### Technology used
-
-- React
-- Express
-- Node & Postgres
-
-seed commands:
-
-psql -U usr -d found-food -f ./seeds/seed.users.sql
-psql -U usr -d found-food -f ./seeds/seed.saved_recipes.sql
+- Express for handling API requests
+- Node for interacting with the file system
+- Knex.js for interfacing with the PostgreSQL database
+- Postgrator for database migration
+- Mocha, Chai, Supertest for endpoints testing
+- JSON Web Token, bcryptjs for user authentication / authorization
