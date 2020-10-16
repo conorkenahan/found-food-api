@@ -9,7 +9,7 @@ This is the backend code for Found Food, a recipe searching app that allows user
 
 ### Recipes Endpoints
 
-`GET /api/recipes/:username`
+###`GET /api/recipes/:username`
 Returns an array of recipes of a specific user.
 
 #### Sample Query
