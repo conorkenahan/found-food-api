@@ -5,6 +5,8 @@ const UsersService = require("./users-service");
 const usersRouter = express.Router();
 const jsonBodyParser = express.json();
 
+const { requireAuth } = require("../middleware/jwt-auth");
+
 usersRouter.post("/", jsonBodyParser, (req, res, next) => {
   const { password, username, name, email } = req.body;
 
@@ -45,6 +47,10 @@ usersRouter.post("/", jsonBodyParser, (req, res, next) => {
       });
     })
     .catch(next);
+});
+
+usersRouter.get("/username", requireAuth, (req, res) => {
+  res.send(req.user);
 });
 
 module.exports = usersRouter;

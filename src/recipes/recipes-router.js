@@ -10,8 +10,8 @@ recipesRouter.route("/:username").get((req, res, next) => {
       userid = id.id;
       RecipesService.getAllRecipesByUser(req.app.get("db"), userid).then(
         (recipes) => {
-          res.json(recipes);
-          res.status(201);
+          // res.json(recipes);
+          res.status(201).json(recipes);
         }
       );
     }
