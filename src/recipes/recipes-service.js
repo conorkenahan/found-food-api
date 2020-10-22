@@ -24,7 +24,7 @@ const RecipesService = {
 
   deleteRecipe(knex, recipeToDelete) {
     return knex("saved_recipes")
-      .where("recipeid", recipeToDelete.recipeid)
+      .where("id", recipeToDelete.recipeid)
       .andWhere("userid", recipeToDelete.userid)
       .delete();
   },
