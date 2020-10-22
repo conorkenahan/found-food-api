@@ -12,7 +12,10 @@ const RecipesService = {
     return knex
       .insert(newRecipe)
       .into("saved_recipes")
-      .where(newRecipe.recipeid !== "saved_recipes.recipeid")
+      .where(
+        newRecipe.recipeid !== "saved_recipes.recipeid" &&
+          newRecipe.userid !== "saved_recipes.userid"
+      )
       .returning("*")
       .then((rows) => {
         return rows[0];
@@ -21,8 +24,8 @@ const RecipesService = {
 
   deleteRecipe(knex, recipeToDelete) {
     return knex("saved_recipes")
-      .where("saved_recipes.recipeid", recipeToDelete.recipeid)
-      .andWhere("saved_recipes.userid", recipeToDelete.userid)
+      .where("recipeid", recipeToDelete.recipeid)
+      .andWhere("userid", recipeToDelete.userid)
       .delete();
   },
 

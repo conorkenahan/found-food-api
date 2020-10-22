@@ -43,7 +43,7 @@ recipesRouter.route("/").delete(jsonBodyParser, (req, res, next) => {
     userid = id.id;
     recipeToDelete = { ...recipeToDelete, userid };
     RecipesService.deleteRecipe(req.app.get("db"), recipeToDelete).then(() => {
-      res.status(204).send();
+      res.status(204).end();
     });
   });
   for (const [key, value] of Object.entries(recipeToDelete))
